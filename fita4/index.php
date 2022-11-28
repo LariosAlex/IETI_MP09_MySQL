@@ -46,19 +46,24 @@
         }  
         
         //TRACTAMENT
-        echo '<form action="index.php" method="post"><select name="codi_pais" id="countries">';
+        echo '<form id="buscarCiutats" action="index.php" method="post">';
             foreach($continents as $continent){
-                echo '<option value="'.$continent['Continent'].'">'.$continent['Continent'].'</option>';
+                echo '<label><input type="checkbox" name="continents[]" value="'.$continent['Continent'].'"> '.$continent['Continent'].'</label><br>';
             }
-        echo '</select><input type="submit" value="Buscar ciutats"></form>';
+        echo '<input type="submit" value="Mostar paisos"></form>';
 
-        if(isset($_POST['codi_pais'])){
-            $cities = connToDB()->prepare("select * FROM country where country.Continent = '".$_POST['codi_pais']."';");
+        if(isset($_POST['continents'])){
+            $continents = [];
+            foreach($_POST['continents'] as $continent){
+                array_push($continents, "'$continent'");
+            }
+            $txtContinents = implode(", ", $continents);
+            $cities = connToDB()->prepare("select * FROM country where country.Continent in (".$txtContinents.");");
             $cities->execute();
             echo "<ul>";
-            foreach($cities as $city){
-                echo '<li>'.$city['Name'].'</li>';
-            }
+                foreach($cities as $city){
+                    echo '<li>'.$city['Name'].'</li>';
+                }
             echo "</ul>";
         }
 
