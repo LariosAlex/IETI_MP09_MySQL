@@ -1,3 +1,6 @@
+<?php
+ session_destroy();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -7,22 +10,7 @@
     <title>Document</title>
 </head>
 <body>
-    <?php
-        function connToDB(){
-            try {
-                $hostname = "localhost";
-                $dbname = "MP09";
-                $username = "admin";
-                $pw = "admin123";
-                $pdo = new PDO ("mysql:host=$hostname;dbname=$dbname","$username","$pw");
-                } catch (PDOException $e) {
-                    echo "Failed to get DB handle: " . $e->getMessage() . "\n";
-                    exit;
-                }
-                return $pdo;
-        }
-    ?>    
-    <form action="protectedLogin.php" method="post">
+    <form action="main.php" method="post">
         <fieldset>
             <legend>Login</legend>
             <input type="text" name="username" id="username" placeholder="Username"><br><br>
@@ -30,21 +18,5 @@
         </fieldset>
         <br><button type="submit">Iniciar sessió</button><br><br>
     </form>
-
-    <?php
-        if(isset($_POST['username'])){
-            $startSession = connToDB()->prepare("SELECT * FROM `users` WHERE users.username = :username AND users.password = SHA2(:pw, 512);");
-            $startSession->bindParam(':username', $_POST['username']);
-            $startSession->bindParam(':pw', $_POST['password']);
-            $startSession->execute();
-            if($startSession->rowCount() != 1){
-                echo 'Login incorrecte';
-            }else{
-                foreach($startSession as $user){
-                    echo 'Benvingut '.$user['username']. "<br>\n";
-                }
-            }
-        }
-    ?>
 </body>
 </html>
