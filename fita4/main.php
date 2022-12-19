@@ -36,11 +36,14 @@
                 foreach($startSession as $user){
                     $_SESSION['username'] = $user['username'];
                     $_SESSION['role'] = $user['role'];
+                    $_SESSION['ID'] = $user['ID'];
                 }
             }
         }else{
-            header("Location: ./protectedLogin.php");
-            exit();
+            if(!isset($_SESSION['ID'])){
+                header("Location: ./protectedLogin.php");
+                exit();
+            }
         }
         if(isset($_SESSION['username'])){
             echo '<h1>'.$_SESSION['username'].'</h1>';
@@ -52,7 +55,7 @@
                 echo '<li><a href="./admin_users.php">Users administration</a></li><br>';
             }
             ?>
-            <li><a href="./main.php">LogOut</a></li>
+            <li><a href="./protectedLogin.php">LogOut</a></li>
             </ul>
             <?php
         }

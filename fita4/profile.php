@@ -17,7 +17,8 @@
             <input type="password" name="password" id="password" placeholder="password"><br><br>
             <input type="email" name="email" id="email" placeholder="your_email@ieti.cat">
         </fieldset>
-        <br><button type="submit">Modificar dades</button><br><br>
+        <br><input type="submit" value="Modificar dades" name="modificar">
+        <input type="submit" value="Torna al menu" name="menu">
     </form>
     <?php
     function connToDB(){
@@ -33,24 +34,30 @@
             }
             return $pdo;
     }
-    if(isset($_POST)){
-            $changeProfile = '';
-            if(isset($_POST['username'])){
-                $changeProfile.= " users.username = 'Larios'";
-            }
-            if(isset($_POST['password'])){
-                if($changeProfile != ''){
-                    $changeProfile.= ',';
-                }
-                $changeProfile.= " users.password = SHA2('".$_POST['password']."', 512)";
-            }
-            if($changeProfile != ''){
-                $startSession = connToDB()->prepare("UPDATE users SET".$changeProfile." WHERE users.username = 'Larios8';");
-                $startSession->execute();
-                header("Location: ./protectedLogin.php");
-                exit();
-            }
+    if(isset($_POST['modificar'])){
+        $changeProfile = '';
+        if(isset($_POST['username'])){
+            $changeProfile.= " users.username = '".$_POST['username']."'";
         }
+        /* if(isset($_POST['password'])){
+            if($changeProfile != ''){
+                $changeProfile.= ',';
+            }
+            $changeProfile.= " users.password = SHA2('".$_POST['password']."', 512)";
+        } */
+        if($changeProfile != ''){
+            $startSession = connToDB()->prepare("UPDATE users SET".$changeProfile." WHERE users.username = :username;");
+            $startSession->bindParam(':username', $_SESSION['username']);
+            $startSession->execute();
+            header("Location: ./protectedLogin.php");
+            exit();
+        }
+    }
+    if(isset($_POST['menu'])){
+        header("Location: ./main.php");
+        $_POST['username'] = $_SESSION['username'];
+        exit;
+    }
         ?>
 </body>
 </html>

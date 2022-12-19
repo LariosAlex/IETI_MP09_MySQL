@@ -1,5 +1,7 @@
 <?php
- session_destroy();
+if(isset($_SESSION)){
+    session_destroy();
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
