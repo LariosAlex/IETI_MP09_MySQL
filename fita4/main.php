@@ -30,7 +30,7 @@
             $startSession->bindParam(':pw', $_POST['password']);
             $startSession->execute();
             if($startSession->rowCount() != 1){
-                header("Location: ./protectedLogin.php");
+                header("Location: ./login.php");
                 exit();
             }else{
                 foreach($startSession as $user){
@@ -41,7 +41,7 @@
             }
         }else{
             if(!isset($_SESSION['ID'])){
-                header("Location: ./protectedLogin.php");
+                header("Location: ./login.php");
                 exit();
             }
         }
@@ -55,7 +55,7 @@
                 echo '<li><a href="./admin_users.php">Users administration</a></li><br>';
             }
             ?>
-            <li><a href="./protectedLogin.php">LogOut</a></li>
+            <li><a href="./login.php">LogOut</a></li>
             </ul>
             <?php
         }
