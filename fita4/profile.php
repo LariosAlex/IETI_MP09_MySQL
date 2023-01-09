@@ -1,5 +1,7 @@
 <?php
  session_start();
+ include 'common.php';
+ $user = infoUser();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,46 +12,33 @@
     <title>Document</title>
 </head>
 <body>
-    <form action="profile.php" method="post">
-        <fieldset>
-            <legend>Dades de <?php $_SESSION['username']?></legend>
-            <input type="text" name="username" id="username" placeholder="username"><br><br>
-            <input type="password" name="password" id="password" placeholder="password"><br><br>
-            <input type="email" name="email" id="email" placeholder="your_email@ieti.cat">
-        </fieldset>
-        <br><input type="submit" value="Modificar dades" name="modificar">
-        <input type="submit" value="Torna al menu" name="menu">
-    </form>
-    <?php
-    function connToDB(){
-        try {
-            $hostname = "localhost";
-            $dbname = "MP09";
-            $username = "admin";
-            $pw = "admin123";
-            $pdo = new PDO ("mysql:host=$hostname;dbname=$dbname","$username","$pw");
-            } catch (PDOException $e) {
-                echo "Failed to get DB handle: " . $e->getMessage() . "\n";
-                exit;
-            }
-            return $pdo;
-    }
+<form action="profile.php" method="post">
+    <fieldset>
+        <legend>Information of <?php echo $user['username']?></legend>
+        <input type="text" name="username" id="username" value="<?php echo $user['username']?>" placeholder="username"><br><br>
+        <input type="email" name="email" id="email" value="<?php echo $user['email']?>" placeholder="your_email@ieti.cat">
+    </fieldset>
+    <br><input type="submit" value="MODIFY INFORMATION" name="modificar" style="background-color:LightSteelBlue">
+    <input type="submit" value="MENU" name="menu">
+</form>
+<?php
+    infoUser();
     if(isset($_POST['modificar'])){
         $changeProfile = '';
         if(isset($_POST['username'])){
             $changeProfile.= " users.username = '".$_POST['username']."'";
         }
-        /* if(isset($_POST['password'])){
+        if(isset($_POST['email'])){
             if($changeProfile != ''){
                 $changeProfile.= ',';
             }
-            $changeProfile.= " users.password = SHA2('".$_POST['password']."', 512)";
-        } */
+            $changeProfile.= " users.email = '".$_POST['email']."'";
+        }
         if($changeProfile != ''){
-            $startSession = connToDB()->prepare("UPDATE users SET".$changeProfile." WHERE users.username = :username;");
-            $startSession->bindParam(':username', $_SESSION['username']);
+            $startSession = connToDB()->prepare("UPDATE users SET".$changeProfile." WHERE users.ID = :id;");
+            $startSession->bindParam(':id', $_SESSION['ID']);
             $startSession->execute();
-            header("Location: ./protectedLogin.php");
+            header("Location: ./login.php");
             exit();
         }
     }
@@ -58,6 +47,6 @@
         $_POST['username'] = $_SESSION['username'];
         exit;
     }
-        ?>
+?>
 </body>
 </html>

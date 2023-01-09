@@ -1,5 +1,7 @@
 <?php
- session_start();
+    session_start();
+    include 'common.php';
+    $infoUser = infoUser();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -11,51 +13,38 @@
 </head>
 <body>
 <?php
-        function connToDB(){
-            try {
-                $hostname = "localhost";
-                $dbname = "MP09";
-                $username = "admin";
-                $pw = "admin123";
-                $pdo = new PDO ("mysql:host=$hostname;dbname=$dbname","$username","$pw");
-                } catch (PDOException $e) {
-                    echo "Failed to get DB handle: " . $e->getMessage() . "\n";
-                    exit;
-                }
-                return $pdo;
-        }
         if(isset($_POST['username'])){
             $startSession = connToDB()->prepare("SELECT * FROM `users` WHERE users.username = :username AND users.password = SHA2(:pw, 512);");
             $startSession->bindParam(':username', $_POST['username']);
             $startSession->bindParam(':pw', $_POST['password']);
             $startSession->execute();
             if($startSession->rowCount() != 1){
-                header("Location: ./protectedLogin.php");
+                header("Location: ./login.php");
                 exit();
             }else{
                 foreach($startSession as $user){
-                    $_SESSION['username'] = $user['username'];
-                    $_SESSION['role'] = $user['role'];
                     $_SESSION['ID'] = $user['ID'];
+                    $infoUser = infoUser();
                 }
             }
         }else{
             if(!isset($_SESSION['ID'])){
-                header("Location: ./protectedLogin.php");
+                header("Location: ./login.php");
                 exit();
             }
         }
-        if(isset($_SESSION['username'])){
-            echo '<h1>'.$_SESSION['username'].'</h1>';
+
+        if(isset($_SESSION['ID'])){
+            echo '<h1>Welcome '.$infoUser['username'].'</h1>';
             ?>
             <ul>
-            <li><a href="./profile.php">Profile</a></li><br>
+            <li><a href="./profile.php">My profile</a></li><br>
             <?php  
-            if($_SESSION['role'] == 1){
-                echo '<li><a href="./admin_users.php">Users administration</a></li><br>';
+            if($infoUser['role'] == 1){
+                echo '<li><a href="./admin_users.php">Users Management</a></li><br>';
             }
             ?>
-            <li><a href="./protectedLogin.php">LogOut</a></li>
+            <li><a href="./login.php">Sign Off</a></li>
             </ul>
             <?php
         }
