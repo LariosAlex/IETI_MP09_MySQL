@@ -1,3 +1,8 @@
+<?php
+ session_start();
+ include 'common.php';
+ $user = infoUser();
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -8,39 +13,38 @@
 </head>
 <body>
     <?php
-        function connToDB(){
-            try {
-                $hostname = "localhost";
-                $dbname = "MP09";
-                $username = "admin";
-                $pw = "admin123";
-                $pdo = new PDO ("mysql:host=$hostname;dbname=$dbname","$username","$pw");
-                } catch (PDOException $e) {
-                echo "Failed to get DB handle: " . $e->getMessage() . "\n";
-                exit;
-                }
-                return $pdo;
+        function selectRol(){
+            $startSession = connToDB()->prepare("SELECT * FROM `tipus_usuari`;");
+            $startSession->execute();
+            echo '<select id="rol"name="rol">';
+            foreach($startSession as $rol){
+                echo '<option value="'.$rol['roleID'].'">'.$rol['roleName'].'</option>';
+            }
+            echo '</select>';
         }
-    ?>   
-    <form action="" method="post">
-        <fieldset>
-            <legend>Registre d'usuaris</legend>
-            <input type="text" name="username" id="username" placeholder="Username"><br><br>
-            <input type="password" name="password" id="password" placeholder="Password"><br><br>
-            <input type="password" name="password2" id="password2" placeholder="Repeat Password">
-        </fieldset>
-        <br><button type="submit">Crear usuari</button>
-    </form>
-    <br>
+    ?>
+        <form action="" method="post">
+            <fieldset>
+                <legend>User registration</legend>
+                <input type="text" name="newUsername" id="newUsername" placeholder="Username"><?php echo selectRol()?><br><br>
+                <input type="password" name="newPassword" id="newPassword" placeholder="Password"><br><br>
+                <input type="password" name="password2" id="password2" placeholder="Repeat Password"><br><br>
+                <input type="text" name="email" id="email" placeholder="Email">
+            </fieldset>
+            <br><button type="submit">Create user</button>
+        </form>
 
     <?php
-        if(isset($_POST['password'])){
-            if(hash('sha512', $_POST['password']) != hash('sha512', $_POST['password2'])){
+
+        if(isset($_POST['newPassword'])){
+            if(hash('sha512', $_POST['newPassword']) != hash('sha512', $_POST['password2'])){
                 echo "Les contrasenyes han de ser iguals\n";
             }else{
-                $startSession = connToDB()->prepare("INSERT INTO users(users.username, users.password) VALUES(:username, SHA2(:pw, 512));");
-                $startSession->bindParam(':username', $_POST['username']);
-                $startSession->bindParam(':pw', $_POST['password']);
+                $startSession = connToDB()->prepare("INSERT INTO users(users.username, users.password, users.email, users.role) VALUES(:username, SHA2(:pw, 512), :email, :rol);");
+                $startSession->bindParam(':username', $_POST['newUsername']);
+                $startSession->bindParam(':pw', $_POST['newPassword']);
+                $startSession->bindParam(':email', $_POST['email']);
+                $startSession->bindParam(':rol', $_POST['rol']);
                 try {
                     $startSession->execute();
                 } catch (PDOException $e) {
@@ -50,6 +54,7 @@
                     exit;
                 }
                 echo "Usuari registrat correctament";
+                header("Location: ./login.php");
             }  
         }
     ?>

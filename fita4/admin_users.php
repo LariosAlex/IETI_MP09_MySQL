@@ -1,5 +1,7 @@
 <?php
  session_start();
+ include 'common.php';
+ $infoUser = infoUser();
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -10,86 +12,72 @@
     <title>Document</title>
 </head>
 <body>
-    <h1>ADMINISTRACIÓ D'USUARIS</h1>
+    <h1>USERS MANAGEMENT</h1>
     <?php  
-        echo '<h2>USER: '.$_SESSION['username'].'</h2>';
-        echo '<h2>ID: '.$_SESSION['role'].'</h2>';
-    ?>
-    <?php
-        function connToDB(){
-            try {
-                $hostname = "localhost";
-                $dbname = "MP09";
-                $username = "admin";
-                $pw = "admin123";
-                $pdo = new PDO ("mysql:host=$hostname;dbname=$dbname","$username","$pw");
-                } catch (PDOException $e) {
-                    echo "Failed to get DB handle: " . $e->getMessage() . "\n";
-                    exit;
-                }
-                return $pdo;
-        }
-        function deleteUser($userID){
-            $startSession = connToDB()->prepare("DELETE FROM users WHERE users.ID = :id;");
-            $startSession->bindParam(':id', $userID);
+        function selectRol($userID, $userRole){
+            $startSession = connToDB()->prepare("SELECT * FROM `tipus_usuari`;");
             $startSession->execute();
-            header("Location: ./admin_users.php");
-            exit();
+            echo '<select id="select'.$userID.'"name="select'.$userID.'">';
+            foreach($startSession as $rol){
+                if($rol['roleID'] == $userRole){
+                    echo '<option value="'.$rol['roleID'].'" selected>'.$rol['roleName'].'</option>';
+                }else{
+                    echo '<option value="'.$rol['roleID'].'">'.$rol['roleName'].'</option>';
+                }
+
+            }
+            echo '</select>';
         }
-        echo "\n".'<form action="./admin_users.php" method="post">';
-        echo '<table><tr><th>ID</th><th>NOM</th><th>EMAIL</th><th>ROL</th><th>ESBORRAR USUARI</th></tr>';
+        echo "\n".'<form action="admin_users.php" method="post">';
+        echo '<table><tr><th>ID</th><th>NAME</th><th>EMAIL</th><th>ROLE</th><th></th></tr>';
         if(isset($_SESSION['username'])){
             $startSession = connToDB()->prepare("SELECT * FROM `users`;");
             $startSession->execute();            
             foreach($startSession as $user){
-                if($user['ID'] != $_SESSION['ID']){
+                if($user['ID'] != $_SESSION['ID'] && $infoUser['role'] == 1){
                     echo "\n".'<tr>';
                     echo "\n".'<td>'.$user['ID'].'</td>';
-                    echo "\n".'<td><input type="text" id="username" name="username'.$user['ID'].'" value="'.$user['username'].'"></td>';
-                    echo "\n".'<td><input type="text" id="email" name="email'.$user['ID'].'" value="'.$user['email'].'"></td>';
-                    echo "\n".'<td><select name="select'.$user['ID'].'">';
-                    if($user['role'] == 1){
-                        echo '<option value="1" selected>Admin user</option>';
-                        echo '</select></td>';
-                    }else{
-                        echo '<option value="1">Admin user</option><option value="2" selected>Default user</option>';
-                        echo '</select></td>';
-                    }
-                    echo "\n".'<td><button style="background-color:red" onclick="deleteUser('.$user['ID'].')">Esborrar usuari</button></td>';
+                    echo "\n".'<td><input type="text" id="username'.$user['ID'].'" name="username'.$user['ID'].'" value="'.$user['username'].'"></td>';
+                    echo "\n".'<td><input type="text" id="email'.$user['ID'].'" name="email'.$user['ID'].'" value="'.$user['email'].'"></td>';
+                    echo "\n".'<td>';
+                    echo selectRol($user['ID'], $user['role']).'</td>';
+                    echo "\n".'<td><button type="submit" style="background-color:IndianRed" name="deleteUser" value="'.$user['ID'].'">Delete user</button></td>';
+                    echo "\n".'<td><button type="submit" style="background-color:LightSteelBlue" name="updateUser" value="'.$user['ID'].'">Update user data</button></td>';
+                    echo '</tr>';
+                }else{
+                    echo "\n".'<tr>';
+                    echo "\n".'<td>'.$user['ID'].'</td>';
+                    echo "\n".'<td><input type="text" id="username'.$user['ID'].'" name="username'.$user['ID'].'" value="'.$user['username'].'" readonly></td>';
+                    echo "\n".'<td><input type="text" id="email'.$user['ID'].'" name="email'.$user['ID'].'" value="'.$user['email'].'" readonly></td>';
+                    echo "\n".'<td>';
+                    echo selectRol($user['ID'], $user['role']).'</td>';
                     echo '</tr>';
                 }
             }
         }
         echo '</table><br>';
     ?>
-    <input type="submit" value="Acualitzar usuaris" name="updateUsers">
-    <input type="submit" value="Torna al menu" name="menu">
+    <input type="submit" value="USER MENU" name="menu">
     </form>
     <?php  
-        //ACTUALITZAR USUARIS
-        if(isset($_POST['updateUsers'])){    
-            $startSession = connToDB()->prepare("SELECT * FROM `users`;");
-            $startSession->execute();    
-            foreach($startSession as $user){
-                if(($_POST['select'.$user['ID']] !=  $user['role']) || ($_POST['username'.$user['ID']] !=  $user['username']) || ($_POST['email'.$user['ID']] !=  $user['email'])){
-                    $startSession = connToDB()->prepare("UPDATE users SET users.username = :username, users.email  = :email, users.role = :rol WHERE users.ID = :id;");
-                    $startSession->bindParam(':id', $user['ID']);
-                    $startSession->bindParam(':username', $_POST['username'.$user['ID']]);
-                    $startSession->bindParam(':email', $_POST['email'.$user['ID']]);
-                    $startSession->bindParam(':rol', $_POST['select'.$user['ID']]);
-                    $startSession->execute();
-                    if($user['ID'] == $_SESSION['ID']){
-                        $_SESSION['username'] = $_POST['username'.$user['ID']];
-                        $_SESSION['role'] = $_POST['role'.$user['ID']];
-                    }
-                    header("Location: ./admin_users.php");
-                    exit();
-                }
-            }
+        if(isset($_POST['updateUser'])){    
+            $startSession = connToDB()->prepare("UPDATE users SET users.username = :username, users.email  = :email, users.role = :rol WHERE users.ID = :id;");
+            $startSession->bindParam(':id', $_POST['updateUser']);
+            $startSession->bindParam(':username', $_POST['username'.$user['ID']]);
+            $startSession->bindParam(':email', $_POST['email'.$user['ID']]);
+            $startSession->bindParam(':rol', $_POST['select'.$user['ID']]);
+            $startSession->execute();
+            header("Location: admin_users.php");
         }
+
+        if(isset($_POST['deleteUser'])){
+            $_SESSION['deleteUser'] = $_POST['deleteUser'];
+            header("Location: ./deleteUser.php");
+            exit();
+        }
+
         if(isset($_POST['menu'])){
             header("Location: ./main.php");
-            $_POST['username'] = $_SESSION['username'];
             exit;
         }
     ?>
