@@ -45,6 +45,7 @@
             }
             ?>
             <li><a href="./login.php">Sign Off</a></li>
+            <li><a href="./email.php">Send Email</a></li><br>
             </ul>
             <?php
         }

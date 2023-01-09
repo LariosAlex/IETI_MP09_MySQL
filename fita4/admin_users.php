@@ -30,7 +30,7 @@
         }
         echo "\n".'<form action="admin_users.php" method="post">';
         echo '<table><tr><th>ID</th><th>NAME</th><th>EMAIL</th><th>ROLE</th><th></th></tr>';
-        if(isset($_SESSION['username'])){
+        if(isset($_SESSION['ID'])){
             $startSession = connToDB()->prepare("SELECT * FROM `users`;");
             $startSession->execute();            
             foreach($startSession as $user){
@@ -63,9 +63,9 @@
         if(isset($_POST['updateUser'])){    
             $startSession = connToDB()->prepare("UPDATE users SET users.username = :username, users.email  = :email, users.role = :rol WHERE users.ID = :id;");
             $startSession->bindParam(':id', $_POST['updateUser']);
-            $startSession->bindParam(':username', $_POST['username'.$user['ID']]);
-            $startSession->bindParam(':email', $_POST['email'.$user['ID']]);
-            $startSession->bindParam(':rol', $_POST['select'.$user['ID']]);
+            $startSession->bindParam(':username', $_POST['username'.$_POST['updateUser']]);
+            $startSession->bindParam(':email', $_POST['email'.$_POST['updateUser']]);
+            $startSession->bindParam(':rol', $_POST['select'.$_POST['updateUser']]);
             $startSession->execute();
             header("Location: admin_users.php");
         }
