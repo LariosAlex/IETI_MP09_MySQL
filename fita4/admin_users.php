@@ -29,6 +29,7 @@
                 }
                 return $pdo;
         }
+
         function deleteUser($userID){
             $startSession = connToDB()->prepare("DELETE FROM users WHERE users.ID = :id;");
             $startSession->bindParam(':id', $userID);
@@ -36,6 +37,7 @@
             header("Location: ./admin_users.php");
             exit();
         }
+
         echo "\n".'<form action="./admin_users.php" method="post">';
         echo '<table><tr><th>ID</th><th>NOM</th><th>EMAIL</th><th>ROL</th><th>ESBORRAR USUARI</th></tr>';
         if(isset($_SESSION['username'])){
@@ -66,6 +68,10 @@
     <input type="submit" value="Torna al menu" name="menu">
     </form>
     <?php  
+        //ESBORRAR USUARIS
+        if(isset($_POST['deleteUser'])){
+            deleteUser($userID);
+        }
         //ACTUALITZAR USUARIS
         if(isset($_POST['updateUsers'])){    
             $startSession = connToDB()->prepare("SELECT * FROM `users`;");
